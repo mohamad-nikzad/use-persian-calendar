@@ -37,11 +37,13 @@
     ]
   },
   "peerDependencies": {
+    "moment-jalaali": "^0.9.6",
     "react": "^18.2.0 || >=17.x",
-    "react-dom": "^18.2.0 || || >=17.x",
-    "moment-jalaali": "^0.9.6"
+    "react-dom": "^18.2.0 || || >=17.x"
   },
   "devDependencies": {
+    "@commitlint/cli": "^17.4.2",
+    "@commitlint/config-conventional": "^17.4.2",
     "@types/moment-jalaali": "^0.7.5",
     "@types/node": "^18.13.0",
     "@types/react": "^18.0.27",
