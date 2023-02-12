@@ -15,7 +15,6 @@
   "main": "./dist/use-persian-calendar.umd.js",
   "module": "./dist/use-persian-calendar.es.js",
   "types": "./dist/index.d.ts",
-  "author": "mohamad nikzad",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -23,7 +22,19 @@
     "prepare": "husky install",
     "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
     "lint:fix": "eslint --fix 'src/**/*.{jsx,ts,tsx}'",
-    "format": "prettier --write src//**/*.{ts,tsx,css} --config ./.prettierrc"
+    "format": "prettier --write src//**/*.{ts,tsx,css} --config ./.prettierrc",
+    "precommit": "npx lint-staged"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx}": [
+      "pnpm  eslint",
+      "pnpm  format"
+    ]
   },
   "peerDependencies": {
     "react": "^18.2.0 || >=17.x",
@@ -49,5 +60,23 @@
     "vite-plugin-dts": "^1.7.2",
     "vite-plugin-linter": "^2.0.2",
     "vite-tsconfig-paths": "^4.0.5"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mohamad-nikzad/use-persian-calendar"
+  },
+  "author": "mohamad nikzad",
+  "keywords": [
+    "calender",
+    "react-calendar",
+    "persian-calendar",
+    "persian-calendar-hook",
+    "react-persian-calendar",
+    "persian"
+  ],
+  "bugs": {
+    "url": "https://github.com/mohamad-nikzad/use-persian-calendar/issues"
+  },
+  "homepage": "https://github.com/mohamad-nikzad/use-persian-calendar#readme",
+  "license": "MIT"
 }
