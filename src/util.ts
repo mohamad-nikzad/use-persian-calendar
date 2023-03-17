@@ -1,5 +1,6 @@
 import moment, { Moment } from 'moment-jalaali'
 import { gregorianMonthsNames, solarDayOfWeekName, solarMonthsNames } from './constants'
+import { CalenderDateType } from './type'
 
 export function getDaysOfMonth(month: Moment, isSolar = true) {
   const days = []
@@ -72,3 +73,33 @@ export const isInMinMaxDateRange = ({
 }) => {
   return (min && moment(date).isBefore(min)) || (max && moment(date).isAfter(max))
 }
+
+export const shouldSetDefaultActiveCalendar = ({
+  activeDate,
+  min,
+  max,
+}: {
+  activeDate?: CalenderDateType | null
+  min?: CalenderDateType
+  max?: CalenderDateType
+}) =>
+  !!activeDate &&
+  moment(activeDate).isValid() &&
+  !isInMinMaxDateRange({ date: activeDate, min, max })
+
+export const shouldUpdateActiveCalender = ({
+  activeCalendar,
+  activeDate,
+  min,
+  max,
+}: {
+  activeCalendar: Moment
+  activeDate?: Moment | null
+  min?: CalenderDateType
+  max?: CalenderDateType
+}) =>
+  !!activeDate &&
+  activeDate.format('jYYYYjMMjDD') !== activeCalendar.format('jYYYYjMMjDD') &&
+  !isInCurrentMonth(activeDate, activeCalendar) &&
+  !isInMinMaxDateRange({ date: activeDate, min, max }) &&
+  activeDate.isValid()

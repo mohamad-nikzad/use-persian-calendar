@@ -1,10 +1,12 @@
 import type { Moment } from 'moment-jalaali'
 
+export type CalenderDateType = Moment | Date
+
 export interface CalenderProps {
-  selectedDate?: Moment | Date | null
+  selectedDate?: CalenderDateType | null
   isSolar?: boolean
-  min?: Moment | Date
-  max?: Moment | Date
+  min?: CalenderDateType
+  max?: CalenderDateType
 }
 
 export type formatedDaysType = Moment & {
