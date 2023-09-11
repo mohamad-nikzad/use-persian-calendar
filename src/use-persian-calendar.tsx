@@ -1,103 +1,104 @@
-import { useCallback, useMemo, useState } from 'react'
-import moment from 'moment-jalaali'
-import type { Moment } from 'moment-jalaali'
-import useUpdateEffect from './hook/use-update-effect'
 import {
-  getAllmonthNames,
-  getDaysOfMonth,
-  getDaysOfWeek,
-  getMonthName,
-  isInCurrentMonth,
-  isInMinMaxDateRange,
+  addMonths,
+  format,
+  isSameMonth,
+  isThisMonth,
   isToday,
+  isValid,
+  setMonth,
+  setYear,
+  subMonths,
+} from 'date-fns-jalali'
+import * as React from 'react'
+
+import { solarDayOfWeekName, solarMonthsNames } from './constants'
+import useUpdateEffect from './hook/use-update-effect'
+import { CalenderProps, FormatedDay } from './type'
+import {
+  getDaysOfMonth,
+  isInMinMaxDateRange,
   shouldSetDefaultActiveCalendar,
   shouldUpdateActiveCalender,
 } from './util'
-import { CalenderProps, formatedDaysType } from './type'
 
 const usePersianCalendar = (props?: CalenderProps) => {
-  const { selectedDate, min, max } = props || {
-    selectedDate: undefined,
-    min: undefined,
-    max: undefined,
-  }
-  const activeDate: Moment | null = useMemo(
+  const { selectedDate, min, max } = props ?? {}
+
+  const activeDate = React.useMemo(
     () =>
-      shouldSetDefaultActiveCalendar({ activeDate: selectedDate, min, max })
-        ? moment(selectedDate)
-        : null,
+      shouldSetDefaultActiveCalendar({ activeDate: selectedDate, min, max }) ? selectedDate : null,
     [selectedDate],
   )
 
-  const [activeCalendar, setActiveCalendar] = useState(activeDate ? activeDate : moment())
-  const today = useMemo(() => moment(), [])
+  const [activeCalendar, setActiveCalendar] = React.useState(activeDate ? activeDate : new Date())
+  const today = React.useMemo(() => new Date(), [])
 
-  const daysOfactiveCalendar = useMemo(() => getDaysOfMonth(activeCalendar), [activeCalendar])
-  const activeMonthName = useMemo(() => getMonthName('fa', activeCalendar), [activeCalendar])
-  const activeYear = useMemo(() => activeCalendar.jYear(), [activeCalendar])
+  const daysOfactiveCalendar = React.useMemo(() => getDaysOfMonth(activeCalendar), [activeCalendar])
+  const activeMonthName = React.useMemo(() => format(activeCalendar, 'MMMM'), [activeCalendar])
+  const activeYear = React.useMemo(() => format(activeCalendar, 'yyyy'), [activeCalendar])
 
-  const monthNames = useMemo(
+  const monthNames = React.useMemo(
     () =>
-      getAllmonthNames().map((name) => {
-        const isActve = name === activeMonthName
-        return { name, isActve }
+      solarMonthsNames.map((name) => {
+        const isActive = name === activeMonthName
+        return { name, isActive }
       }),
     [activeMonthName],
   )
-  const daysOfWeek = useMemo(() => getDaysOfWeek(), [])
-  const days: formatedDaysType[] = useMemo(
+
+  const days: FormatedDay[] = React.useMemo(
     () =>
       daysOfactiveCalendar.map((day) => {
-        const value = day.format('jDD')
-        const isFromOtherMonth = day.format('jMM') !== activeCalendar.format('jMM')
+        const dayInMonth = format(day, 'd')
+        const isFromOtherMonth = !isSameMonth(day, activeCalendar)
         const _isToday = isToday(day)
         const isSelected = activeDate
-          ? day.format('jYYYYjMMjDD') === activeDate.format('jYYYYjMMjDD')
+          ? format(day, 'yyyy-MM-dd') === format(activeDate, 'yyyy-MM-dd')
           : false
         const disabled = isInMinMaxDateRange({ date: day, min, max })
-        Object.assign(day, { isFromOtherMonth, isToday: _isToday, isSelected, disabled, value })
-        return day as formatedDaysType
+        return { isFromOtherMonth, isToday: _isToday, isSelected, disabled, dayInMonth, date: day }
       }),
     [daysOfactiveCalendar, activeDate],
   )
 
-  const nextMonthHandler = useCallback(() => {
-    setActiveCalendar((prevState) => prevState.clone().add(1, 'jMonth'))
+  const nextMonthHandler = React.useCallback(() => {
+    setActiveCalendar((prevState) => addMonths(prevState, 1))
   }, [])
 
-  const goToYearHandler = useCallback((year: string | number) => {
+  const goToYearHandler = React.useCallback((year: string | number) => {
     setActiveCalendar((prevState) => {
-      const utcYear = moment(`${prevState.jMonth() + 1}-${year}`, 'jM-jYYYY').format('YYYY')
-      const newDate = prevState.clone().set({ year: Number(utcYear) })
-      return newDate.isValid() ? newDate : prevState
+      const date = setYear(prevState, Number(year))
+      return isValid(date) ? date : prevState
     })
   }, [])
 
-  const goToMonthHandler = useCallback((month: number | string) => {
-    const m = typeof month === 'string' ? getAllmonthNames().indexOf(month) : month
+  const goToMonthHandler = React.useCallback((month: string | number) => {
     setActiveCalendar((prevState) => {
-      const newDate = moment(`${prevState.jYear()},${m + 1},${prevState.jDate()}`, 'jYYYY/jM/jDD')
-      return newDate.isValid() ? newDate : prevState
+      const monthNumber =
+        typeof month === 'string' ? solarMonthsNames.indexOf(month) : Number(month) - 1
+      const date = setMonth(prevState, monthNumber)
+      return isValid(date) ? date : prevState
     })
   }, [])
 
-  const prevMonthHandler = useCallback(() => {
-    setActiveCalendar((prevState) => prevState.clone().subtract(1, 'jMonth'))
+  const prevMonthHandler = React.useCallback(() => {
+    setActiveCalendar((prevState) => subMonths(prevState, 1))
   }, [])
 
-  const goToToday = useCallback(() => {
-    !isInCurrentMonth(activeCalendar) && setActiveCalendar(today)
+  const goToToday = React.useCallback(() => {
+    !isThisMonth(activeCalendar) && setActiveCalendar(today)
   }, [activeCalendar])
 
   useUpdateEffect(() => {
-    shouldUpdateActiveCalender({ activeCalendar, activeDate, min, max }) &&
+    if (shouldUpdateActiveCalender({ activeCalendar, activeDate, min, max })) {
       setActiveCalendar(activeDate!)
+    }
   }, [activeDate])
 
   return {
     days,
     monthNames,
-    daysOfWeek,
+    daysOfWeek: solarDayOfWeekName,
     activeMonthName,
     activeYear,
     today,

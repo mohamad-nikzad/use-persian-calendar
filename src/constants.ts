@@ -28,4 +28,4 @@ export const gregorianMonthsNames = [
   'October',
   'November',
   'December',
-]
+] as const

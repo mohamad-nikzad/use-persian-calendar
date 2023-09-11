@@ -39,7 +39,7 @@
     ]
   },
   "peerDependencies": {
-    "moment-jalaali": "^0.9.6",
+    "date-fns-jalali": "^2.30.0-0 ||>=^2.30",
     "react": "^18.2.0 || >=17.x",
     "react-dom": "^18.2.0 || >=17.x"
   },
@@ -47,7 +47,6 @@
     "@commitlint/cli": "^17.4.2",
     "@commitlint/config-conventional": "^17.4.2",
     "@testing-library/react": "^13.4.0",
-    "@types/moment-jalaali": "^0.7.5",
     "@types/node": "^18.13.0",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
@@ -60,7 +59,6 @@
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "husky": "^8.0.3",
     "jsdom": "^21.1.0",
-    "moment-jalaali": "^0.9.6",
     "prettier": "^2.8.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

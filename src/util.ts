@@ -1,77 +1,44 @@
-import moment, { Moment } from 'moment-jalaali'
-import { gregorianMonthsNames, solarDayOfWeekName, solarMonthsNames } from './constants'
-import { CalenderDateType } from './type'
+import {
+  eachDayOfInterval,
+  endOfMonth,
+  endOfWeek,
+  format,
+  isAfter,
+  isBefore,
+  isSameMonth,
+  isValid,
+  startOfMonth,
+  startOfWeek,
+} from 'date-fns-jalali'
 
-export function getDaysOfMonth(month: Moment, isSolar = true) {
-  const days = []
+export function getDaysOfMonth(month: Date) {
+  const days: Date[] = []
 
-  const monthFormat: any = isSolar ? 'jMonth' : 'month'
-  const dayOffset = isSolar ? 1 : 0
+  const current = startOfWeek(startOfMonth(month))
+  const end = endOfWeek(endOfMonth(month))
 
-  const current = month.clone().startOf(monthFormat)
-  const end = month.clone().endOf(monthFormat)
-
-  // Set start to the first day of week in the last month
-  current.subtract((current.day() + dayOffset) % 7, 'days')
-
-  // Set end to the last day of week in the next month
-  end.add(6 - ((end.day() + dayOffset) % 7), 'days')
-
-  while (current.isBefore(end)) {
-    days.push(current.clone())
-    current.add(1, 'days')
-  }
+  eachDayOfInterval({ start: current, end: end }).forEach((day) => {
+    days.push(day)
+  })
 
   return days
 }
 
-export const getDaysOfWeek = (isSolar = true) => {
-  return solarDayOfWeekName
+export const isInMinMaxDateRange = ({ date, min, max }: { date: Date; min?: Date; max?: Date }) => {
+  return (min && isBefore(date, min)) || (max && isAfter(date, max)) || false
 }
 
-type formatedDaysType = Moment & {
-  isFromOtherMonth: boolean
-  isToday: boolean
-  isSelected: boolean
-  disabled: boolean
-  value: string
-}
+export function getWeekDays() {
+  const now = new Date()
+  const weekDays: string[] = []
+  const start = startOfWeek(now)
+  const end = endOfWeek(now)
 
-export const isToday = (date: Moment) => {
-  const format = 'jYYYYjMMjDD'
-  return moment().format(format) === date.format(format)
-}
+  eachDayOfInterval({ start, end }).forEach((day) => {
+    weekDays.push(format(day, 'EE'))
+  })
 
-export const isInCurrentMonth = (date: Moment, currentDate?: Moment) => {
-  const format = 'jYYYYjMM'
-  const d = currentDate ? currentDate : moment()
-  return d.format(format) === date.format(format)
-}
-
-export const getMonthName = (locale: string | string[], date: Moment | Date) => {
-  const options: Intl.DateTimeFormatOptions = {
-    month: 'long',
-  }
-
-  const dateObject = date instanceof Date ? date : date.clone().toDate()
-  return new Intl.DateTimeFormat(locale, options).format(dateObject)
-}
-
-export const getAllmonthNames = (isSolar = true) => {
-  if (isSolar) return solarMonthsNames
-  else return gregorianMonthsNames
-}
-
-export const isInMinMaxDateRange = ({
-  date,
-  min,
-  max,
-}: {
-  date: Date | Moment
-  min?: Date | Moment
-  max?: Date | Moment
-}) => {
-  return (min && moment(date).isBefore(min)) || (max && moment(date).isAfter(max))
+  return weekDays
 }
 
 export const shouldSetDefaultActiveCalendar = ({
@@ -79,13 +46,10 @@ export const shouldSetDefaultActiveCalendar = ({
   min,
   max,
 }: {
-  activeDate?: CalenderDateType | null
-  min?: CalenderDateType
-  max?: CalenderDateType
-}) =>
-  !!activeDate &&
-  moment(activeDate).isValid() &&
-  !isInMinMaxDateRange({ date: activeDate, min, max })
+  activeDate?: Date | null
+  min?: Date
+  max?: Date
+}) => !!activeDate && isValid(activeDate) && !isInMinMaxDateRange({ date: activeDate, min, max })
 
 export const shouldUpdateActiveCalender = ({
   activeCalendar,
@@ -93,13 +57,13 @@ export const shouldUpdateActiveCalender = ({
   min,
   max,
 }: {
-  activeCalendar: Moment
-  activeDate?: Moment | null
-  min?: CalenderDateType
-  max?: CalenderDateType
+  activeCalendar: Date
+  activeDate?: Date | null
+  min?: Date
+  max?: Date
 }) =>
   !!activeDate &&
-  activeDate.format('jYYYYjMMjDD') !== activeCalendar.format('jYYYYjMMjDD') &&
-  !isInCurrentMonth(activeDate, activeCalendar) &&
+  format(activeDate, 'yyyy-MM-dd') !== format(activeCalendar, 'yyyy-MM-dd') &&
+  !isSameMonth(activeDate, activeCalendar) &&
   !isInMinMaxDateRange({ date: activeDate, min, max }) &&
-  activeDate.isValid()
+  isValid(activeDate)
