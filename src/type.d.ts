@@ -10,7 +10,7 @@ export type FormatedDay = {
   disabled: boolean
 }
 export interface CalenderProps {
-  selectedDate?: Date | null
+  selectedDate?: Date | null | number
   min?: Date
   max?: Date
 }

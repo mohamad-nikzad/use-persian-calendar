@@ -11,7 +11,7 @@ import {
   startOfWeek,
 } from 'date-fns-jalali'
 
-export function getDaysOfMonth(month: Date) {
+export function getDaysOfMonth(month: Date | number) {
   const days: Date[] = []
 
   const current = startOfWeek(startOfMonth(month))
@@ -24,7 +24,15 @@ export function getDaysOfMonth(month: Date) {
   return days
 }
 
-export const isInMinMaxDateRange = ({ date, min, max }: { date: Date; min?: Date; max?: Date }) => {
+export const isInMinMaxDateRange = ({
+  date,
+  min,
+  max,
+}: {
+  date: Date | number
+  min?: Date | number
+  max?: Date | number
+}) => {
   return (min && isBefore(date, min)) || (max && isAfter(date, max)) || false
 }
 
@@ -46,9 +54,9 @@ export const shouldSetDefaultActiveCalendar = ({
   min,
   max,
 }: {
-  activeDate?: Date | null
-  min?: Date
-  max?: Date
+  activeDate?: Date | null | number
+  min?: Date | number
+  max?: Date | number
 }) => !!activeDate && isValid(activeDate) && !isInMinMaxDateRange({ date: activeDate, min, max })
 
 export const shouldUpdateActiveCalender = ({
@@ -57,10 +65,10 @@ export const shouldUpdateActiveCalender = ({
   min,
   max,
 }: {
-  activeCalendar: Date
-  activeDate?: Date | null
-  min?: Date
-  max?: Date
+  activeCalendar: Date | number
+  activeDate?: Date | null | number
+  min?: Date | number
+  max?: Date | number
 }) =>
   !!activeDate &&
   format(activeDate, 'yyyy-MM-dd') !== format(activeCalendar, 'yyyy-MM-dd') &&

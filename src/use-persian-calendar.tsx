@@ -30,7 +30,9 @@ const usePersianCalendar = (props?: CalenderProps) => {
     [selectedDate],
   )
 
-  const [activeCalendar, setActiveCalendar] = React.useState(activeDate ? activeDate : new Date())
+  const [activeCalendar, setActiveCalendar] = React.useState<number | Date>(
+    activeDate ? activeDate : new Date(),
+  )
   const today = React.useMemo(() => new Date(), [])
 
   const daysOfactiveCalendar = React.useMemo(() => getDaysOfMonth(activeCalendar), [activeCalendar])
